@@ -10,6 +10,8 @@ public class FedisCredentials {
     private String address;
     private String password;
     private int port;
+    private int dbID;
+    private int subID;
 
     public boolean isAuth() {
         return this.password != null && !this.password.isEmpty();

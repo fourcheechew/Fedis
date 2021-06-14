@@ -10,6 +10,7 @@ import me.forty.fedis.jedis.IFedisCommand;
 import me.forty.fedis.util.TypeCallback;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,8 +29,8 @@ public class Fedis {
     public Fedis(FedisCredentials fedisCredentials, String[] channels) {
         this.fedisCredentials = fedisCredentials;
         this.channels = channels;
-        this.pool = new JedisPool(fedisCredentials.getAddress(), fedisCredentials.getPort());
-        this.subPool = new JedisPool(fedisCredentials.getAddress(), fedisCredentials.getPort());
+        this.pool = new JedisPool(new JedisPoolConfig(), fedisCredentials.getAddress(), fedisCredentials.getPort(), 20000, fedisCredentials.isAuth() ? fedisCredentials.getPassword() : null, fedisCredentials.getDbID());
+        this.subPool = new JedisPool(new JedisPoolConfig(), fedisCredentials.getAddress(), fedisCredentials.getPort(), 20000, fedisCredentials.isAuth() ? fedisCredentials.getPassword() : null, fedisCredentials.getSubID());
         try (Jedis jedis = this.subPool.getResource()) {
             attemptAuth(jedis);
             (this.thread = new Thread(() -> jedis.subscribe(new FedisPubSub(this), this.channels))).start();
@@ -100,6 +101,9 @@ public class Fedis {
             if (jedis != null) {
                 this.pool.returnResource(jedis);
             }
+        }
+        if (callback != null) {
+            callback.callback(result);
         }
     }
 
