@@ -26,14 +26,15 @@ public class Fedis {
     private List<FedisSubscriber> subscribers = new ArrayList<>();
     private String[] channels;
 
-    public Fedis(FedisCredentials fedisCredentials, String[] channels) {
+    public Fedis(FedisCredentials fedisCredentials, String... channels) {
         this.fedisCredentials = fedisCredentials;
         this.channels = channels;
         this.pool = new JedisPool(new JedisPoolConfig(), fedisCredentials.getAddress(), fedisCredentials.getPort(), 20000, fedisCredentials.isAuth() ? fedisCredentials.getPassword() : null, fedisCredentials.getDbID());
         this.subPool = new JedisPool(new JedisPoolConfig(), fedisCredentials.getAddress(), fedisCredentials.getPort(), 20000, fedisCredentials.isAuth() ? fedisCredentials.getPassword() : null, fedisCredentials.getSubID());
         try (Jedis jedis = this.subPool.getResource()) {
             attemptAuth(jedis);
-            (this.thread = new Thread(() -> jedis.subscribe(new FedisPubSub(this), this.channels))).start();
+            this.thread = new FedisThread(this);
+            thread.start();
         }
 
     }

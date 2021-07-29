@@ -2,8 +2,10 @@ package me.forty.fedis.jedis;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
+@Setter
 @AllArgsConstructor
 public class FedisCredentials {
 
