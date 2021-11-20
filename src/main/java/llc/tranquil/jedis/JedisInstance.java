@@ -3,6 +3,7 @@ package llc.tranquil.jedis;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 import llc.tranquil.jedis.packet.*;
 import lombok.Getter;
 import redis.clients.jedis.Jedis;
@@ -81,7 +82,8 @@ public class JedisInstance {
 
     public void sendPacket(Packet packet) {
         try (Jedis jedis = pool.getResource()) {
-            jedis.publish(channel, packet.getId() + ";" + gson.toJsonTree(packet.getData()).toString());
+            String data = gson.toJsonTree(packet.getData()).toString();
+            jedis.publish(channel, packet.getId() + ";" + data.substring(1, data.length() - 1));
             if (debug) Logger.getGlobal().severe("[Nexus] Sent packet " + packet.getId() + ".");
         } catch (Exception e) {
             e.printStackTrace();
